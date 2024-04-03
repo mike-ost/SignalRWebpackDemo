@@ -5,13 +5,24 @@ require("./css/main.css");
 var divMessages = document.querySelector("#divMessages");
 var tbMessage = document.querySelector("#tbMessage");
 var btnSend = document.querySelector("#btnSend");
+var btnAddToGroup = document.querySelector("#btnAddToGroup");
+var btnRemoveFromGroup = document.querySelector("#btnRemoveFromGroup");
 var username = new Date().getTime();
 var connection = new signalR.HubConnectionBuilder()
     .withUrl("/hub")
     .build();
 connection.on("messageReceived", function (username, message) {
     var m = document.createElement("div");
+    console.log(username);
+    console.log(message);
     m.innerHTML = "<div class=\"message-author\">".concat(username, "</div><div>").concat(message, "</div>");
+    divMessages.appendChild(m);
+    divMessages.scrollTop = divMessages.scrollHeight;
+});
+connection.on("send", function (message) {
+    console.log(message);
+    var m = document.createElement("div");
+    m.innerHTML = "<div class=\"message-author\">empty</div><div>".concat(message, "</div>");
     divMessages.appendChild(m);
     divMessages.scrollTop = divMessages.scrollHeight;
 });
@@ -22,7 +33,20 @@ tbMessage.addEventListener("keyup", function (e) {
     }
 });
 btnSend.addEventListener("click", send);
+btnAddToGroup.addEventListener("click", addToGroup);
+btnRemoveFromGroup.addEventListener("click", removeFromGroup);
 function send() {
+    console.log("send");
     connection.send("newMessage", username, tbMessage.value)
+        .then(function () { return (tbMessage.value = ""); });
+}
+function addToGroup() {
+    console.log("addToGroup");
+    connection.send("addToGroup", "group1")
+        .then(function () { return (tbMessage.value = ""); });
+}
+function removeFromGroup() {
+    console.log("removeToGroup");
+    connection.send("removeFromGroup", "group1")
         .then(function () { return (tbMessage.value = ""); });
 }
